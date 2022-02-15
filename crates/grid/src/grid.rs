@@ -26,7 +26,7 @@ use crate::iteration::{Iter, IterMut};
 /// // | (2,0) | (2,1) | (2,2) | (2,3) | (2,4) |
 /// // +-------+-------+-------+-------+-------+
 /// ```
-pub struct Grid<T: Default> {
+pub struct Grid<T> {
     inner: Vec<T>,
     dim: GridDimension,
 }
@@ -69,7 +69,7 @@ impl<T: Default + Clone> Grid<T> {
     }
 }
 
-impl<T: Default> Grid<T> {
+impl<T> Grid<T> {
     /// Return the numbers of elements in the grid.
     #[inline]
     pub fn count(&self) -> usize {

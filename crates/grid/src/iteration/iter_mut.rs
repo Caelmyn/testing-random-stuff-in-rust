@@ -3,12 +3,12 @@ use super::cursor::Cursor;
 
 /* ---------- */
 
-pub struct IterMut<'a, T: Default> {
+pub struct IterMut<'a, T> {
     inner: &'a mut [T],
     cursor: Cursor
 }
 
-impl<'a, T: Default> IterMut<'a, T> {
+impl<'a, T> IterMut<'a, T> {
     /// Construct a mutable iterator over a Grid.
     #[inline]
     pub(crate) fn new(inner: &'a mut [T], grid_width: usize, area: Area) -> Self {

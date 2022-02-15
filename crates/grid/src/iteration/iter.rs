@@ -3,12 +3,12 @@ use super::cursor::Cursor;
 
 /* ---------- */
 
-pub struct Iter<'a, T: Default> {
+pub struct Iter<'a, T> {
     inner: &'a [T],
     cursor: Cursor
 }
 
-impl<'a, T: Default> Iter<'a, T> {
+impl<'a, T> Iter<'a, T> {
     /// Construct an iterator over a Grid.
     #[inline]
     pub(crate) fn new(inner: &'a [T], grid_width: usize, area: Area) -> Self {
@@ -19,7 +19,7 @@ impl<'a, T: Default> Iter<'a, T> {
     }
 }
 
-impl<'a, T: Default> Iterator for Iter<'a, T> {
+impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {

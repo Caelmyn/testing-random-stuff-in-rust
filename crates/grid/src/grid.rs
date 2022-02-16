@@ -76,6 +76,18 @@ impl<T> Grid<T> {
         self.dim.area()
     }
 
+    /// Convert some (x, y) coord into a index.
+    #[inline]
+    pub const fn index_from_coord(&self, x: usize, y: usize) -> usize {
+        self.dim.index_from_coord(x, y)
+    }
+
+    /// Convert an index into the corrersonding coords in the grid.
+    #[inline]
+    pub const fn coords_from_index(&self, index: usize) -> (usize, usize) {
+        self.dim.coords_from_index(index)
+    }
+
     /// Return a shared reference to the item at the coords (x, y).<br>
     /// Return Option<&T> if the coords are contained in the grid, None otherwise.
     #[inline]

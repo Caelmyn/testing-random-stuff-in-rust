@@ -12,9 +12,12 @@ impl<'a, T> IterMut<'a, T> {
     /// Construct a mutable iterator over a Grid.
     #[inline]
     pub(crate) fn new(inner: &'a mut [T], grid_width: usize, area: Area) -> Self {
+        let cursor = Cursor::new(grid_width, area);
+        let inner = inner.split_at_mut(cursor.index()).1;
+
         Self {
             inner,
-            cursor: Cursor::new(grid_width, area)
+            cursor,
         }
     }
 }
@@ -23,18 +26,23 @@ impl<'a, T: Default> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
+
         if self.inner.is_empty() || !self.cursor.is_valid() {
             return None
         }
 
-        let prev_index = self.cursor.index();
-        self.cursor.next();
-        let new_index = self.cursor.index();
-
         let array = std::mem::take(&mut self.inner);
-        let (left, right) = array.split_at_mut(new_index - prev_index);
+        let prev_index = self.cursor.index();
 
-        self.inner = right;
-        Some(&mut left[0])
+        self.cursor.next();
+        let diff = self.cursor.index() - prev_index;
+
+        if diff < array.len() {
+            let (left, right) = array.split_at_mut(diff);
+            self.inner = right;
+            Some(&mut left[0])
+        } else {
+            Some(&mut array[0])
+        }
     }
 }

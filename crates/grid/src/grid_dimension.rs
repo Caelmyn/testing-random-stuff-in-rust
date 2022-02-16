@@ -24,6 +24,13 @@ impl GridDimension {
         utils::index_from_coord(x, y, self.0)
     }
 
+    /// Convert an index into the corrersonding coords in the grid.
+    #[doc(hidden)]
+    #[inline]
+    pub(crate) const fn coords_from_index(&self, index: usize) -> (usize, usize) {
+        utils::coords_from_index(index, self.0)
+    }
+
     /// Return numbers of elements in the grid.
     #[doc(hidden)]
     #[inline]

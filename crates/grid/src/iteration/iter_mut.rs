@@ -24,7 +24,7 @@ impl<'a, T> IterMut<'a, T> {
     }
 }
 
-impl<'a, T: Default> Iterator for IterMut<'a, T> {
+impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {

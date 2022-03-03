@@ -112,6 +112,29 @@ mod tests {
     use crate::Area;
 
     #[test]
+    fn area() {
+        let dim = GridDimension::new(10, 5);
+        assert_eq!(dim.area(), 50);
+
+        let dim = GridDimension::new(0, 5);
+        assert_eq!(dim.area(), 0);
+
+        let dim = GridDimension::from((5, 5));
+        assert_eq!(dim.area(), 25);
+    }
+
+    #[test]
+    fn conversion() {
+        let dim = GridDimension::from((10, 10));
+        let index = 13;
+        let x = 3;
+        let y = 1;
+
+        assert_eq!(dim.coords_from_index(index), (x, y));
+        assert_eq!(dim.index_from_coord(3, 1), index);
+    }
+
+    #[test]
     fn rectify_test() {
         let dim = GridDimension::new(10, 10);
 

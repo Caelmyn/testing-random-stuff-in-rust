@@ -70,6 +70,33 @@ impl<T: Default + Clone> Grid<T> {
 }
 
 impl<T> Grid<T> {
+    /// Creates a Grid from a Vec.
+    ///
+    /// Returns `Some(Grid)` if the vec can be perfectly converted to a Grid
+    /// ### Example
+    /// ```
+    /// # use grid::Grid;
+    /// assert!(Grid::try_from_vec(vec![0; 100], 10).is_some());
+    /// assert!(Grid::try_from_vec(vec![0; 99], 10).is_none());
+    /// ```
+    #[inline]
+    pub fn try_from_vec(array: Vec<T>, grid_width: usize) -> Option<Self> {
+        let len = array.len();
+        let width = len / grid_width;
+
+        if len % grid_width != 0 {
+            return None;
+        }
+
+        let height = len / grid_width;
+        let ret = Self {
+            inner: array,
+            dim: GridDimension::new(width, height),
+        };
+
+        Some(ret)
+    }
+
     /// Return the numbers of elements in the grid.
     #[inline]
     pub fn count(&self) -> usize {
@@ -121,31 +148,146 @@ impl<T> Grid<T> {
     /// Return an iterator over the whole grid.<br>
     /// It iterates 'rows by rows'.
     #[inline]
-    pub fn iter(&self) -> Iter<T> {
-        Iter::new(&self.inner, self.dim.width(), Area::from(self.dim))
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        self.inner.iter()
     }
 
     /// Return an iterator over a part of the grid specified by the given Area.<br>
     /// It iterates 'rows by rows'.
     #[inline]
-    pub fn iter_over(&self, area: Area) -> Iter<T> {
+    pub fn iter_over(&self, area: Area) -> impl Iterator<Item = &T> {
         Iter::new(&self.inner, self.dim.width(), area)
     }
 
     /// Return a mutable iterator over the whole grid.<br>
     /// It iterates 'rows by rows'.
     #[inline]
-    pub fn iter_mut(&mut self) -> IterMut<T> {
-        IterMut::new(&mut self.inner, self.dim.width(), Area::from(self.dim))
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut T> {
+        self.inner.iter_mut()
     }
 
     /// Return a mutable iterator over a part of the grid specified by the given Area.<br>
     /// It iterates 'rows by rows'.
     #[inline]
-    pub fn iter_over_mut(&mut self, area: Area) -> IterMut<T> {
+    pub fn iter_over_mut(&mut self, area: Area) -> impl Iterator<Item = &mut T> {
         match self.dim.rectify(area) {
             Some(area) => IterMut::new(&mut self.inner, self.dim.width(), area),
             None => IterMut::new(&mut [], self.dim.width(), area),
+        }
+    }
+}
+
+/* ---------- */
+
+#[cfg(test)]
+mod tests {
+    use crate::Area;
+    use crate::Grid;
+
+    const GRID_SIZE: usize = 10;
+    const ARRAY_LEN: usize = GRID_SIZE * GRID_SIZE;
+
+    #[test]
+    fn getters() {
+        let mut array = Vec::with_capacity(ARRAY_LEN);
+        for value in 0..ARRAY_LEN {
+            array.push(value)
+        }
+
+        let mut grid = Grid::try_from_vec(array, GRID_SIZE).unwrap();
+        assert_eq!(grid.get(5, 6), Some(&65));
+        assert_eq!(grid.get_at_index(65), Some(&65));
+        assert_eq!(grid.get_mut(5, 7), Some(&mut 75));
+        assert_eq!(grid.get_at_index_mut(75), Some(&mut 75));
+
+        *grid.get_mut(9, 9).unwrap() = 0;
+        assert_eq!(grid.get(9, 9), Some(&0))
+    }
+
+    #[test]
+    fn test_iter() {
+        let grid = Grid::new_square_filled(GRID_SIZE, 2);
+
+        assert_eq!(grid.iter().count(), ARRAY_LEN);
+        grid.iter().for_each(|val| assert_eq!(val, &2));
+        assert_eq!(grid.iter().sum::<i32>(), 200);
+    }
+
+    #[test]
+    fn test_iter_over() {
+        let grid = Grid::new_square_filled(GRID_SIZE, 0);
+
+        assert_eq!(grid.iter_over(Area::new(0, 0, 0, 0)).count(), 1);
+        assert_eq!(grid.iter_over(Area::new(0, 0, 1, 1)).count(), 4);
+        assert_eq!(grid.iter_over(Area::new(1, 1, 2, 2)).count(), 4);
+        assert_eq!(grid.iter_over(Area::new(0, 0, 9, 9)).count(), 100);
+        assert_eq!(grid.iter_over(Area::new(10, 10, 11, 11)).count(), 0);
+        assert_eq!(grid.iter_over(Area::new(9, 9, 9, 9)).count(), 1);
+        assert_eq!(grid.iter_over(Area::new(5, 6, 6, 6)).count(), 2);
+        assert_eq!(grid.iter_over(Area::new(9, 9, 10, 9)).count(), 1);
+
+        let mut array = Vec::with_capacity(ARRAY_LEN);
+        for value in 0..ARRAY_LEN {
+            array.push(value)
+        }
+
+        let grid = Grid::try_from_vec(array, GRID_SIZE).unwrap();
+        let expected = [11, 12, 13, 21, 22, 23, 31, 32, 33];
+        grid.iter_over(Area::new(1, 1, 3, 3))
+            .enumerate()
+            .for_each(|(index, value)| {
+                assert_eq!(*value, expected[index]);
+            })
+    }
+
+    #[test]
+    fn test_iter_mut() {
+        let mut grid = Grid::new_square_filled(GRID_SIZE, 0);
+
+        assert_eq!(grid.iter_mut().count(), ARRAY_LEN);
+        assert_eq!(grid.iter().sum::<i32>(), 0);
+
+        grid.iter_mut().for_each(|val| *val = 10);
+        assert_eq!(grid.iter().sum::<i32>(), 1000);
+
+        grid.iter_mut()
+            .enumerate()
+            .for_each(|(index, val)| *val = index as i32);
+
+        for index in 0..ARRAY_LEN {
+            assert_eq!(grid.get_at_index(index), Some(&(index as i32)))
+        }
+    }
+
+    #[test]
+    fn test_iter_mut_over() {
+        let mut grid = Grid::new_square_filled(GRID_SIZE, 0);
+
+        assert_eq!(grid.iter_mut().count(), ARRAY_LEN);
+        assert_eq!(grid.iter().sum::<i32>(), 0);
+
+        grid.iter_over_mut(Area::new(0, 0, 10, 10))
+            .for_each(|val| *val = 10);
+
+        assert_eq!(grid.iter().sum::<i32>(), 1000);
+        assert_eq!(grid.iter_over_mut(Area::new(10, 10, 20, 20)).count(), 0);
+
+        let mut array = Vec::with_capacity(ARRAY_LEN);
+        for value in 0..ARRAY_LEN {
+            array.push(value)
+        }
+
+        let mut grid = Grid::try_from_vec(array, GRID_SIZE).unwrap();
+        grid.iter_over_mut(Area::new(1, 1, 3, 3))
+            .for_each(|value| *value = 0);
+
+        let expected = [11, 12, 13, 21, 22, 23, 31, 32, 33];
+        for index in 0..ARRAY_LEN {
+            if expected.contains(&index) {
+                assert_eq!(grid.get_at_index(index), Some(&0))
+            } else {
+                assert_eq!(grid.get_at_index(index), Some(&index))
+            }
         }
     }
 }

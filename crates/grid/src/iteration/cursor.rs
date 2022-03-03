@@ -46,11 +46,7 @@ impl Iterator for Cursor {
     type Item = usize;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.cursor.1 > self.area.bottom {
-            return None;
-        }
-
-        let index = self.index_unchecked();
+        let index = self.index();
 
         if self.cursor.0 >= self.area.right {
             self.cursor.0 = self.area.left;
@@ -59,7 +55,7 @@ impl Iterator for Cursor {
             self.cursor.0 += 1;
         }
 
-        Some(index)
+        index
     }
 }
 

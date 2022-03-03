@@ -211,26 +211,3 @@ fn test_iter_mut_over() {
 }
 
 /* ---------- */
-
-#[test]
-fn test_area_elements() {
-    assert_eq!(Area::new(0, 0, 0, 0).area(), 1);
-    assert_eq!(Area::new(999, 999, 999, 999).area(), 1);
-    assert_eq!(Area::new(0, 0, 999, 999).area(), 1_000_000);
-    assert_eq!(Area::new(999, 999, 0, 0).area(), 1_000_000);
-    assert_eq!(Area::new(959, 489, 964, 759).area(), 1626);
-}
-
-/* ---------- */
-
-#[test]
-fn test_area_correctness() {
-    assert_eq!(Area::new(0, 0, 0, 0), Area::new(0, 0, 0, 0));
-    assert_eq!(Area::new(0, 0, 9, 9), Area::new(9, 9, 0, 0));
-
-    let area = Area::new(9, 9, 0, 0);
-    assert_eq!(area.top, 0);
-    assert_eq!(area.left, 0);
-    assert_eq!(area.bottom, 9);
-    assert_eq!(area.right, 9);
-}

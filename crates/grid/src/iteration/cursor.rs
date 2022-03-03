@@ -1,63 +1,74 @@
-use crate::Area;
 use crate::utils;
+use crate::Area;
 
-/// A Cursor is the heart of the iterator, it is this structure that define the current
-/// index position and the next position according to the grid size and the area to
-/// iterate over.
-#[doc(hidden)]
-#[derive(Debug, Default, Clone, Copy)]
+/* ---------- */
+
+/// Iterator that returns a set of 2D coord over a given Area.
 pub(super) struct Cursor {
     grid_width: usize,
     area: Area,
-    cursor: usize,
+    cursor: (usize, usize),
 }
 
 impl Cursor {
-    /// Construct a new cursor.
-    #[doc(hidden)]
+    /// Create a new iterator over an Area. To compute the 2D coord
+    /// it needs to know the width of the grid.
     #[inline]
-    pub(super) const fn new(grid_width: usize, area: Area) -> Self {
-        let cursor = utils::index_from_coord(area.left, area.top, grid_width);
+    pub(super) fn new(grid_width: usize, area: Area) -> Self {
+        let cursor = (area.left, area.top);
 
         Self {
             grid_width,
             area,
-            cursor
+            cursor,
         }
     }
 
-    /// Define the next position in the array based on the grid size and the area to iterate over.
-    #[doc(hidden)]
+    /// Compute the current Cursor array index. Returns None if the cursor
+    /// is out of the grid's bound.
     #[inline]
-    pub(super) fn next(&mut self) {
-        let (x, y) = utils::coords_from_index(self.cursor, self.grid_width);
-        if x >= self.area.right {
-            self.cursor = utils::index_from_coord(self.area.left, y + 1, self.grid_width);
-        } else {
-            self.cursor += 1;
-        }
+    pub(super) fn index(&self) -> Option<usize> {
+        (self.cursor.1 <= self.area.bottom).then(|| self.index_unchecked())
     }
 
-    /// Return whether or not the cursor is contained in the area.
-    #[doc(hidden)]
+    /// Compute the current Cursor array index.
+    ///
+    /// ## Safety
+    /// The returned index isn't checked ; it might returns on index that is
+    /// out of the grid's bounds
     #[inline]
-    pub(super) const fn is_valid(&self) -> bool {
-        let (x, y) = utils::coords_from_index(self.cursor, self.grid_width);
-        x <= self.area.right && y <= self.area.bottom
-    }
-
-    /// Return the current position of the cursor in the array.
-    #[doc(hidden)]
-    #[inline]
-    pub(super) const fn index(&self) -> usize {
-        self.cursor
+    pub(super) fn index_unchecked(&self) -> usize {
+        utils::index_from_coord(self.cursor.0, self.cursor.1, self.grid_width)
     }
 }
 
+impl Iterator for Cursor {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.cursor.1 > self.area.bottom {
+            return None;
+        }
+
+        let index = self.index_unchecked();
+
+        if self.cursor.0 >= self.area.right {
+            self.cursor.0 = self.area.left;
+            self.cursor.1 += 1
+        } else {
+            self.cursor.0 += 1;
+        }
+
+        Some(index)
+    }
+}
+
+/* ---------- */
+
 #[cfg(test)]
 mod tests {
-    use crate::Area;
     use super::Cursor;
+    use crate::Area;
 
     const GRID_SIZE: usize = 1000;
 
@@ -65,18 +76,37 @@ mod tests {
     fn new_cursor() {
         let area = Area::new(0, 0, 0, 0);
         let cursor = Cursor::new(GRID_SIZE, area);
-        assert_eq!(cursor.cursor, 0);
+        assert_eq!(cursor.cursor, (0, 0));
 
         let area = Area::new(0, 1, 0, 0);
         let cursor = Cursor::new(GRID_SIZE, area);
-        assert_eq!(cursor.cursor, 0);
+        assert_eq!(cursor.cursor, (0, 0));
 
         let area = Area::new(0, 1, 0, 1);
         let cursor = Cursor::new(GRID_SIZE, area);
-        assert_eq!(cursor.cursor, 1);
+        assert_eq!(cursor.cursor, (1, 0));
 
         let area = Area::new(959, 489, 964, 759);
         let cursor = Cursor::new(GRID_SIZE, area);
-        assert_eq!(cursor.cursor, 959489);
+        assert_eq!(cursor.cursor, (489, 959));
+    }
+
+    #[test]
+    fn iter() {
+        let area = Area::new(0, 0, 0, 0);
+        let mut cursor = Cursor::new(GRID_SIZE, area);
+        assert_eq!(cursor.next(), Some(0));
+        assert_eq!(cursor.next(), None);
+
+        let area = Area::new(0, 0, 1, 1);
+        let cursor = Cursor::new(GRID_SIZE, area);
+        assert_eq!(cursor.count(), 4);
+
+        let area = Area::new(1, 1, 2, 2);
+        let cursor = Cursor::new(GRID_SIZE, area);
+        let witness = [1001, 1002, 2001, 2002];
+        cursor
+            .enumerate()
+            .for_each(|(idx, cursor)| assert_eq!(cursor, witness[idx]))
     }
 }

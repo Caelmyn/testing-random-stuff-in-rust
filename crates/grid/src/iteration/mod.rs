@@ -1,8 +1,6 @@
-//! The module where the iterators are defined.
-
-mod iter_mut;
-mod iter;
 mod cursor;
+mod iter;
+mod iter_mut;
 
 pub use iter::Iter;
 pub use iter_mut::IterMut;

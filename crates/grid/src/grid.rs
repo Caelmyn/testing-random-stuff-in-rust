@@ -122,7 +122,7 @@ impl<T> Grid<T> {
     /// It iterates 'rows by rows'.
     #[inline]
     pub fn iter(&self) -> Iter<T> {
-        self.iter_over(Area::from(self.dim))
+        Iter::new(&self.inner, self.dim.width(), Area::from(self.dim))
     }
 
     /// Return an iterator over a part of the grid specified by the given Area.<br>
@@ -136,13 +136,16 @@ impl<T> Grid<T> {
     /// It iterates 'rows by rows'.
     #[inline]
     pub fn iter_mut(&mut self) -> IterMut<T> {
-        self.iter_over_mut(Area::from(self.dim))
+        IterMut::new(&mut self.inner, self.dim.width(), Area::from(self.dim))
     }
 
     /// Return a mutable iterator over a part of the grid specified by the given Area.<br>
     /// It iterates 'rows by rows'.
     #[inline]
     pub fn iter_over_mut(&mut self, area: Area) -> IterMut<T> {
-        IterMut::new(&mut self.inner, self.dim.width(), area)
+        match self.dim.rectify(area) {
+            Some(area) => IterMut::new(&mut self.inner, self.dim.width(), area),
+            None => IterMut::new(&mut [], self.dim.width(), area),
+        }
     }
 }

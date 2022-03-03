@@ -2,7 +2,7 @@ use crate::grid_dimension::GridDimension;
 
 /* ---------- */
 
-/// An Area that allow iteration over a specific part of a grid.
+/// Allow iteration over a specific part of a Grid.
 #[derive(Default, Debug, PartialEq, Clone, Copy)]
 pub struct Area {
     /// The area's top bound
@@ -77,8 +77,8 @@ impl From<GridDimension> for Area {
         Self {
             top: 0,
             left: 0,
-            bottom: dim.height(),
-            right: dim.width(),
+            bottom: dim.height() - 1,
+            right: dim.width() - 1,
         }
     }
 }

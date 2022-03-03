@@ -1,4 +1,4 @@
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 
 //! A Grid is a wrapper around an array built to ease
 //! manipulation of grid-like arrays

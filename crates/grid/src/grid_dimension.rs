@@ -1,10 +1,11 @@
 use crate::utils;
+use crate::Area;
 
 /* ---------- */
 
-/// A GridDimension defines a grid size. It's basically a helper
-/// to ease readability and provides some usefull methods for
-/// index <-> coords conversions.
+/// A GridDimension defines a grid size. It's basically a wrapper
+/// around a (usize, usize) tuple to ease readability and provides
+/// some usefull methods for index <-> coords conversions.
 #[doc(hidden)]
 #[derive(Debug, Default, Clone, Copy)]
 pub(crate) struct GridDimension(usize, usize);
@@ -51,6 +52,47 @@ impl GridDimension {
     pub(crate) const fn height(&self) -> usize {
         self.1
     }
+
+    /// Rectify an Area to make sure that an iterator based on that Area
+    /// wont go out of Grid's bound.
+    ///
+    /// An Area can be rectified if it is partially contained in the GridDimension
+    ///
+    /// ### Return
+    /// Returns the area modified wrapped in a Some variant if the area could
+    /// be rectified, None otherwise.
+    ///
+    /// ### Examples
+    /// ```ignore
+    /// # use grid::grid_dimension::GridDimension;
+    /// # use grid::Area;
+    /// let dim = GridDimension::new(10, 10);
+    ///
+    /// let area = Area::new(5, 5, 10, 10);
+    /// let rectified = dim.rectify(area);
+    /// assert_eq!(rectified, Some(Area::new(5, 5, 9, 9)));
+    ///
+    /// let area = Area::new(10, 10, 20, 20);
+    /// let rectified = dim.rectify(area);
+    /// assert_eq!(rectified, None);
+    /// ```
+    #[doc(hidden)]
+    #[inline]
+    pub(crate) const fn rectify(&self, mut area: Area) -> Option<Area> {
+        if area.left >= self.0 || area.top >= self.1 {
+            return None;
+        }
+
+        if area.right >= self.0 {
+            area.right = self.0 - 1
+        }
+
+        if area.bottom >= self.1 {
+            area.bottom = self.1 - 1
+        }
+
+        Some(area)
+    }
 }
 
 impl From<(usize, usize)> for GridDimension {
@@ -59,5 +101,42 @@ impl From<(usize, usize)> for GridDimension {
     #[inline]
     fn from((width, height): (usize, usize)) -> Self {
         Self::new(width, height)
+    }
+}
+
+/* ---------- */
+
+#[cfg(test)]
+mod tests {
+    use super::GridDimension;
+    use crate::Area;
+
+    #[test]
+    fn rectify_test() {
+        let dim = GridDimension::new(10, 10);
+
+        let area = Area::new(5, 5, 10, 10);
+        let rectified = dim.rectify(area);
+        assert_eq!(rectified, Some(Area::new(5, 5, 9, 9)));
+
+        let area = Area::new(5, 6, 8, 8);
+        let rectified = dim.rectify(area);
+        assert_eq!(rectified, Some(Area::new(5, 6, 8, 8)));
+
+        let area = Area::new(0, 0, 9, 9);
+        let rectified = dim.rectify(area);
+        assert_eq!(rectified, Some(Area::new(0, 0, 9, 9)));
+
+        let area = Area::new(5, 15, 20, 20);
+        let rectified = dim.rectify(area);
+        assert_eq!(rectified, None);
+
+        let area = Area::new(15, 5, 20, 20);
+        let rectified = dim.rectify(area);
+        assert_eq!(rectified, None);
+
+        let area = Area::new(10, 10, 20, 20);
+        let rectified = dim.rectify(area);
+        assert_eq!(rectified, None);
     }
 }

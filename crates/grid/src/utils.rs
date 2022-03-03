@@ -25,10 +25,18 @@ mod tests {
     const GRID_SIZE: usize = 1000;
 
     #[test]
-    fn conversion_index_to_coords() {
+    fn conversion_index_from_coords() {
         assert_eq!(index_from_coord(0, 0, GRID_SIZE), 0);
         assert_eq!(index_from_coord(1, 0, GRID_SIZE), 1);
         assert_eq!(index_from_coord(0, 1, GRID_SIZE), 1000);
         assert_eq!(index_from_coord(999, 1, GRID_SIZE), 1999);
+    }
+
+    #[test]
+    fn conversion_coords_from_index() {
+        assert_eq!(coords_from_index(0, GRID_SIZE), (0, 0));
+        assert_eq!(coords_from_index(1, GRID_SIZE), (1, 0));
+        assert_eq!(coords_from_index(1000, GRID_SIZE), (0, 1));
+        assert_eq!(coords_from_index(1999, GRID_SIZE), (999, 1));
     }
 }

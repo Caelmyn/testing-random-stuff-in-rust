@@ -76,3 +76,9 @@ impl<T: Clone, const N: usize> Iterator for Kombini<T, N> {
         ret
     }
 }
+
+impl<T: Clone, const N: usize> ExactSizeIterator for Kombini<T, N> {
+    fn len(&self) -> usize {
+        N * (N - 1)
+    }
+}

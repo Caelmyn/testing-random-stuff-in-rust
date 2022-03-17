@@ -14,9 +14,8 @@ let expected = [
     [1, 3, 2],
 ];
 
-// Iterates over all the possible combinasion of the
-// array [1, 2, 3]
-komb.enumerate().for_each(|(index, combinaison)| {
-    assert_eq!(combinaison, expected[index])
+// Iterates over all the possible combinasion of the array [1, 2, 3]
+komb.for_each(|combinaison| {
+    // Something nice and cool with the combinaisons.
 })
 ```

@@ -4,6 +4,7 @@ This repository hosts most of my thoughts/tries in rust development.
 So far, here's the link to the crates for the lasiest of us :
 * [grid](https://github.com/Caelmyn/testing-random-stuff-in-rust/tree/main/crates/grid)
 * [kombini](https://github.com/Caelmyn/testing-random-stuff-in-rust/tree/main/crates/kombini)
+* [partitions](https://github.com/Caelmyn/testing-random-stuff-in-rust/tree/main/crates/partitions)
 
 ## Disclaimer
 One can use the code here for educational or prototyping purposes.

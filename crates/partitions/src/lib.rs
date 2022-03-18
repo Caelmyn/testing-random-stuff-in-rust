@@ -1,3 +1,7 @@
+//! Iterates over the partitions of fixed addends.
+
+#![deny(missing_docs)]
+
 /// Iterates over the partitions of fixed addends
 /// of a given positive integer.
 ///

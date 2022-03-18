@@ -36,18 +36,17 @@ impl Area {
     /// assert_eq!(area.bottom, 9);
     /// assert_eq!(area.right, 9);
     /// ```
-    #[inline]
+    #[inline(always)]
     pub const fn new(mut top: usize, mut left: usize, mut bottom: usize, mut right: usize) -> Self {
         // Manual swap because std::mem::swap isn't stable in const context yet
-        #[allow(clippy::manual_swap)]
+        #![allow(clippy::manual_swap)]
+
         if top > bottom {
             let tmp = top;
             top = bottom;
             bottom = tmp;
         }
 
-        // Manual swap because std::mem::swap isn't stable in const context yet
-        #[allow(clippy::manual_swap)]
         if left > right {
             let tmp = left;
             left = right;
@@ -62,10 +61,22 @@ impl Area {
         }
     }
 
+    /// Return width of the Area.
+    #[inline(always)]
+    pub const fn width(&self) -> usize {
+        self.right - self.left + 1
+    }
+
+    /// Return height of the Area.
+    #[inline(always)]
+    pub const fn height(&self) -> usize {
+        self.bottom - self.top + 1
+    }
+
     /// Return the number of elements covered by the Area.
-    #[inline]
+    #[inline(always)]
     pub const fn area(&self) -> usize {
-        (self.bottom - self.top + 1) * (self.right - self.left + 1)
+        self.height() * self.width()
     }
 }
 

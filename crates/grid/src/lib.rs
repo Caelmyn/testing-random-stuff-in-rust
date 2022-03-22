@@ -20,6 +20,7 @@ mod area;
 mod grid;
 mod grid_dimension;
 mod iteration;
+mod iteration_v2;
 mod utils;
 
 pub use crate::area::Area;

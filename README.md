@@ -2,6 +2,7 @@ This repository hosts most of my thoughts/tries in rust development.
 
 ## Pretty little things
 So far, here's the link to the crates for the lasiest of us :
+* [delta](https://github.com/Caelmyn/testing-random-stuff-in-rust/tree/main/crates/delta)
 * [grid](https://github.com/Caelmyn/testing-random-stuff-in-rust/tree/main/crates/grid)
 * [kombini](https://github.com/Caelmyn/testing-random-stuff-in-rust/tree/main/crates/kombini)
 * [partitions](https://github.com/Caelmyn/testing-random-stuff-in-rust/tree/main/crates/partitions)
